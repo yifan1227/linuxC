@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "windows": {
+      "options": {
+        "shell": {
+          "executable": "a.out",
+          "args": [""]
+        }
+      }
+    },
+    "tasks": [
+      {
+        "label": "build",
+        "type": "shell",
+        "command": "gcc",
+        "args": [
+          "-g",
+          "-o",
+          "/home/yifan/C-Prog/a.out",
+          "struct.c"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      }
+    ]
+  }
