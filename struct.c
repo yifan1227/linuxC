@@ -20,23 +20,9 @@ struct s s2;
 
 void main()
 {
-/*	struct s s1 = {
-		.add = add,
-		.sub = sub
-	    };
-	struct s s1 = {
-		add,
-		sub
-	};	
-	struct s *p = &s2;
-	p -> add = add;
-	p -> sub = sub;
-*/
-//	printf("%d\n", sizeof(s_t *));
 	s_t *S = (s_t *)malloc(sizeof(s_t)*3);
 	for(int i = 0; i < 3; i++)
 	{
-//		printf("OK here");
 //		S[i] -> add = add;
 //		S[i] -> sub = sub;
 		S[i].add = add;
