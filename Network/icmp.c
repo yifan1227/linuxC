@@ -90,7 +90,10 @@ int ping(const char *ip)
         return -1;
     int sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if(sock == -1)
+    {
+        perror("socket create");
         return -1;
+    }
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = RECV_TIMEOUT_USEC;
