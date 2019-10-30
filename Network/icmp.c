@@ -112,13 +112,13 @@ int ping(const char *ip)
             ret = send_echo_request(sock, &addr, ident, seq);
             if(ret == -1)
             perror("Send failed");
+             next_ts += 1;
+            seq += 1;
         }
-        next_ts += 1;
-        seq += 1;
+        ret = recv_echo_reply(sock, ident);
+        if(ret == -1)
+            perror("Receive failed");
     }
-    ret = recv_echo_reply(sock, ident);
-    if(ret == -1)
-        perror("Receive failed");
     return 0;
 }
 
