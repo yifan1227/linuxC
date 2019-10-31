@@ -40,7 +40,7 @@ int send_echo_request(int sock, struct sockaddr_in *addr, int ident, int seq )
 {
     struct icmpv6_echo icmp;
     bzero(&icmp, sizeof(icmp));
-    icmp.type = 8;
+    icmp.type = 128;
     icmp.code = 0;
     icmp.ident = htons(ident);
     icmp.seq = htons(seq);
@@ -49,8 +49,11 @@ int send_echo_request(int sock, struct sockaddr_in *addr, int ident, int seq )
     icmp.checksum = htons(calculate_checksum((unsigned char *)&icmp, sizeof(icmp)));
 
     int bytes = sendto(sock, &icmp, sizeof(icmp), 0, (struct sockaddr *)addr, sizeof(*addr));
-    if (bytes == -1)
+    if (bytes <= 0)
+    {
+        perror("send echo request");
         return -1;
+    }
 
     return 0;
 }
