@@ -2,7 +2,10 @@
     "files.associations": {
         "icmp.h": "c",
         "string.h": "c",
-        "inet.h": "c"
+        "inet.h": "c",
+        "stdio.h": "c",
+        "csapp.h": "c",
+        "netdb.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
