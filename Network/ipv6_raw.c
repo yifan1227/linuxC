@@ -35,12 +35,14 @@ int main(int argc, const char *argv[])
     // argv[1] src addr; argv[2] dst addr
     dst.sin6_family = AF_INET6;
     inet_pton(AF_INET6, argv[1], &dst.sin6_addr);
-    
+
 
     // ipv6 header
-    iphdr.ip6_flow = ((6 << 28) | (0 << 20) | 0);
+    iphdr.ip6_flow = htonl((6 << 28) | (0 << 20) | 0);
     iphdr.ip6_plen = htons(0);
     iphdr.ip6_nxt = IPPROTO_ICMPV6;
+    inet_pton(AF_INET6, argv[1], &iphdr.ip6_dst);
+    inet_pton(AF_INET6, "::1", &iphdr.ip6_src);
     // icmpv6 header
     icmppkt.icmphdr.icmp6_type = ICMP6_ECHO_REQUEST;
     icmppkt.icmphdr.icmp6_code = 0;
