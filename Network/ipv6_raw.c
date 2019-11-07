@@ -34,7 +34,7 @@ int main(int argc, const char *argv[])
 
     // argv[1] src addr; argv[2] dst addr
     dst.sin6_family = AF_INET6;
-    inet_pton(AF_INET6, argv[2], &dst.sin6_addr);
+    inet_pton(AF_INET6, argv[1], &dst.sin6_addr);
     
 
     // ipv6 header
@@ -54,7 +54,7 @@ int main(int argc, const char *argv[])
     }
     struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
-    snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", "lo0");
+    snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", "lo");
 
 
     // Bind socket to interface index.
@@ -62,7 +62,9 @@ int main(int argc, const char *argv[])
         perror ("setsockopt() failed to bind to interface ");
         exit (EXIT_FAILURE);
     }
-    int bytes = sendto(sockfd, ip_pkt, sizeof(ip_pkt), 0, (struct sockaddr *)&dst, sizeof(dst));
+    memcpy(ip_pkt, &iphdr, sizeof(iphdr));
+    memcpy(ip_pkt + sizeof(iphdr), &icmppkt, sizeof(icmppkt));
+    int bytes = sendto(sockfd, ip_pkt, 100, 0, (struct sockaddr *)&dst, sizeof(dst));
     if(bytes < 0)
         perror("send failed");
     return 1;
