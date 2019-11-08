@@ -8,7 +8,7 @@
 #include <netinet/icmp6.h>
 #include <net/if.h>
 
-#define ICMP_HDRLEN 4
+#define ICMP_HDRLEN 8
 #define IPV6_HDRLEN 40
 
 struct icmp
@@ -37,10 +37,9 @@ int main(int argc, const char *argv[])
 
     // ipv6 header
     iphdr.ip6_flow = htonl((6 << 28) | (0 << 20) | 0);
-    iphdr.ip6_plen = htons(0);
+    iphdr.ip6_plen = htons(58);
     iphdr.ip6_nxt = IPPROTO_ICMPV6;
     iphdr.ip6_hops = 64;
-    iphdr.ip6_plen = htons(64);
     inet_pton(AF_INET6, argv[1], &iphdr.ip6_dst);
     inet_pton(AF_INET6, "::1", &iphdr.ip6_src);
     // icmpv6 header
@@ -49,7 +48,7 @@ int main(int argc, const char *argv[])
     icmppkt.icmphdr.icmp6_id = 0x2345;
     icmppkt.icmphdr.icmp6_seq = htons(0x01);
     icmppkt.icmphdr.icmp6_cksum = 0x1234;
-    strcpy(icmppkt.payload, "helloyifan");
+    strcpy(icmppkt.payload, "hello1234");
     if (setsockopt (sockfd, IPPROTO_IPV6, IP_HDRINCL, &on, sizeof (on)) < 0) {
         perror ("setsockopt() failed to set IP_HDRINCL ");
         exit (EXIT_FAILURE);
@@ -64,7 +63,7 @@ int main(int argc, const char *argv[])
         perror ("setsockopt() failed to bind to interface ");
         exit (EXIT_FAILURE);
     }
-    ip_pkt = (uint8_t *)malloc(sizeof(uint8_t)*(IPV6_HDRLEN +18));
+    ip_pkt = (uint8_t *)malloc(IPV6_HDRLEN + ICMP_HDRLEN + 10);
     if(ip_pkt < 0)
         perror("ipv6 packet create");
     memcpy(ip_pkt, &iphdr, sizeof(iphdr));
