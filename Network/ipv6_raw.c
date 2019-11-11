@@ -47,11 +47,11 @@ int main(int argc, const char *argv[])
     // icmpv6 header
     icmppkt.icmphdr.icmp6_type = ICMP6_ECHO_REQUEST;
     icmppkt.icmphdr.icmp6_code = 0;
-    icmppkt.icmphdr.icmp6_id = 0x2345;
+    icmppkt.icmphdr.icmp6_id = htons(0x1234);
     icmppkt.icmphdr.icmp6_seq = htons(0x01);
     icmppkt.icmphdr.icmp6_cksum = 0;
     strcpy(icmppkt.payload, "hello1234");
-    icmppkt.icmphdr.icmp6_cksum = checksum((uint16_t *)icmppkt, sizeof(icmppkt));
+    icmppkt.icmphdr.icmp6_cksum = checksum((uint16_t *)&icmppkt, sizeof(icmppkt));
     if (setsockopt (sockfd, IPPROTO_IPV6, IP_HDRINCL, &on, sizeof (on)) < 0) {
         perror ("setsockopt() failed to set IP_HDRINCL ");
         exit (EXIT_FAILURE);
