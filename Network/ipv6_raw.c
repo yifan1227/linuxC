@@ -17,6 +17,8 @@ struct icmp
     char   payload[10];
 };
 
+uint16_t checksum(uint16_t *, int);
+
 int main(int argc, const char *argv[])
 {
     int sockfd;
@@ -47,8 +49,9 @@ int main(int argc, const char *argv[])
     icmppkt.icmphdr.icmp6_code = 0;
     icmppkt.icmphdr.icmp6_id = 0x2345;
     icmppkt.icmphdr.icmp6_seq = htons(0x01);
-    icmppkt.icmphdr.icmp6_cksum = 0x1234;
+    icmppkt.icmphdr.icmp6_cksum = 0;
     strcpy(icmppkt.payload, "hello1234");
+    icmppkt.icmphdr.icmp6_cksum = checksum((uint16_t *)icmppkt, sizeof(icmppkt));
     if (setsockopt (sockfd, IPPROTO_IPV6, IP_HDRINCL, &on, sizeof (on)) < 0) {
         perror ("setsockopt() failed to set IP_HDRINCL ");
         exit (EXIT_FAILURE);
@@ -72,4 +75,21 @@ int main(int argc, const char *argv[])
     if(bytes < 0)
         perror("send failed");
     return 1;
+}
+
+uint16_t checksum(uint16_t *packet, int size)
+{
+    uint32_t cksum = 0;
+    while(size > 1)
+    {
+        cksum += *packet++;
+        size -= 2;
+    }
+    if(size)
+    {
+        cksum += *packet;
+    }
+    cksum=(cksum>>16)+(cksum&0xffff);
+    cksum+=(cksum>>16);
+    return(uint16_t)(~cksum);
 }
