@@ -33,13 +33,14 @@ int main(int argc, const char *argv[])
         perror("socket create");
 
     // argv[1] src addr; argv[2] dst addr
+    memset(&dst, 0, sizeof(dst));
     dst.sin6_family = AF_INET6;
     inet_pton(AF_INET6, argv[1], &dst.sin6_addr);
 
 
     // ipv6 header
     iphdr.ip6_flow = htonl((6 << 28) | (0 << 20) | 0);
-    iphdr.ip6_plen = htons(58);
+    iphdr.ip6_plen = htons(18);
     iphdr.ip6_nxt = IPPROTO_ICMPV6;
     iphdr.ip6_hops = 64;
     inet_pton(AF_INET6, argv[1], &iphdr.ip6_dst);
@@ -51,7 +52,16 @@ int main(int argc, const char *argv[])
     icmppkt.icmphdr.icmp6_seq = htons(0x01);
     icmppkt.icmphdr.icmp6_cksum = 0;
     strcpy(icmppkt.payload, "hello1234");
-    icmppkt.icmphdr.icmp6_cksum = checksum((uint16_t *)&icmppkt, sizeof(icmppkt));
+    uint8_t *cksum;
+    cksum = (uint8_t *)malloc(18);
+    memcpy(cksum, &icmppkt.icmphdr, 8);
+    memcpy(cksum + 8, icmppkt.payload, 10);
+    for(int i = 0; i< 18; i++)
+    {
+
+    printf("%d ", *(cksum+i));
+    }
+    icmppkt.icmphdr.icmp6_cksum = checksum((uint16_t *)&cksum, 18);
     if (setsockopt (sockfd, IPPROTO_IPV6, IP_HDRINCL, &on, sizeof (on)) < 0) {
         perror ("setsockopt() failed to set IP_HDRINCL ");
         exit (EXIT_FAILURE);
@@ -87,9 +97,9 @@ uint16_t checksum(uint16_t *packet, int size)
     }
     if(size)
     {
-        cksum += *packet;
+        cksum += *(uint8_t *)packet;
     }
     cksum=(cksum>>16)+(cksum&0xffff);
     cksum+=(cksum>>16);
-    return(uint16_t)(~cksum);
+    return (uint16_t)(~cksum);
 }
