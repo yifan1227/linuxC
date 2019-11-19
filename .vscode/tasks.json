@@ -17,7 +17,7 @@
           "-g",
           "-o",
           "/home/yifan/C-Prog/a.out",
-          "struct.c"
+          "test.c"
         ],
         "group": {
           "kind": "build",
