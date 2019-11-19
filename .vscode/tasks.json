@@ -1,5 +1,28 @@
 {
     "version": "2.0.0",
+<<<<<<< HEAD
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "gcc-7 build active file",
+            "command": "/usr/bin/gcc-7",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "/usr/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        }
+    ]
+}
+=======
     "windows": {
       "options": {
         "shell": {
@@ -26,3 +49,4 @@
       }
     ]
   }
+>>>>>>> b27b201dac5744f66f4d455844d73e75da5c7f4c

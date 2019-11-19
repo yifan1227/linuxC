@@ -8,8 +8,13 @@
             "name": "gcc-7 build and debug active file",
             "type": "cppdbg",
             "request": "launch",
+<<<<<<< HEAD
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "args": ["::1"],
+=======
             "program": "${workspaceFolder}/a.out",
             "args": [],
+>>>>>>> b27b201dac5744f66f4d455844d73e75da5c7f4c
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -22,7 +27,11 @@
                     "ignoreFailures": true
                 }
             ],
+<<<<<<< HEAD
+            "preLaunchTask": "gcc-7 build active file",
+=======
             "preLaunchTask": "build",
+>>>>>>> b27b201dac5744f66f4d455844d73e75da5c7f4c
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
