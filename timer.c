@@ -7,8 +7,9 @@
 #include <stdbool.h>
 
 struct arg{
-		char a[20];
-		bool b;			// 1 for periodical and 0 for non-periodical
+	char a[20];
+	bool b;			// 1 for periodical and 0 for non-periodical
+	int  sec;
 };
 
 void milliseconds_sleep(unsigned long mSec){
@@ -28,14 +29,14 @@ void wake(struct arg *argu)
 	while(1)
         {
 			pthread_testcancel();	
-            milliseconds_sleep(1000);
+            milliseconds_sleep(argu->sec * 1000);
             printf("%s, the secret passed by the main thread is: %d\n", argu->a, argu->b);
         }
 	}
 	else
 	{
 		{
-                milliseconds_sleep(1000);
+                milliseconds_sleep(argu->sec * 1000);
                 printf("%s, the secret passed by the main thread is: %d\n", argu->a, argu->b);
         }
 	}
@@ -44,8 +45,8 @@ void wake(struct arg *argu)
 int main()
 {
 	pthread_t id1, id2;
-	struct arg arg1 = {"Hello from thread1", true};
-	struct arg arg2 = {"Hello from thread2", false};
+	struct arg arg1 = {"Hello from thread1", true, 1};
+	struct arg arg2 = {"Hello from thread2", true, 2};
 	int res = pthread_create(&id1, NULL, (void *)wake, &arg1);
 	int res2 = pthread_create(&id2, NULL, (void *)wake, &arg2);
 	if(res)
@@ -55,17 +56,18 @@ int main()
 		return -1;
 	}
 	int i = 2;
-	while(i >= 0)
+	/*while(i >= 0)
 	{
 		printf("I'm in main\n");
 		sleep(3);
 		i--;
-	}
-	pthread_cancel(id1);
+	}*/
+	/*pthread_cancel(id1);
 	while(1)
 	{
 		printf("no thread now\n");
 		sleep(1);
-	}
+	}*/
+	pthread_join(id1, NULL);
 	return 1;
 }

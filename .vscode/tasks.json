@@ -1,6 +1,5 @@
 {
     "version": "2.0.0",
-<<<<<<< HEAD
     "tasks": [
         {
             "type": "shell",
@@ -22,31 +21,4 @@
         }
     ]
 }
-=======
-    "windows": {
-      "options": {
-        "shell": {
-          "executable": "a.out",
-          "args": [""]
-        }
-      }
-    },
-    "tasks": [
-      {
-        "label": "build",
-        "type": "shell",
-        "command": "gcc",
-        "args": [
-          "-g",
-          "-o",
-          "/home/yifan/C-Prog/a.out",
-          "test.c"
-        ],
-        "group": {
-          "kind": "build",
-          "isDefault": true
-        }
-      }
-    ]
-  }
->>>>>>> b27b201dac5744f66f4d455844d73e75da5c7f4c
+
