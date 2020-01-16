@@ -22,12 +22,12 @@ struct bridge_value{
 };
 
 typedef struct wpan_hdlc_info{
-    uint8_t *rx_buf;
+    uint8_t rx_buf[200];
     uint16_t rx_len;
     uint8_t rx_state;
     uint8_t seqnorx;
 
-    uint8_t *tx_buf;
+    uint8_t tx_buf[100];
     uint16_t tx_len;
     uint8_t seqnotx;
 }wpan_hdlc_info_t;

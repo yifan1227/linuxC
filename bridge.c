@@ -20,8 +20,6 @@
 
 int fd;
 wpan_hdlc_info_t hdlc_info;
-uint8_t rx_buf[100];
-uint8_t tx_buf[100];
 
 int set_opt(int fd, int nSpeed, int nBits, char nEvent, int nStop)
 {
@@ -81,9 +79,9 @@ int set_opt(int fd, int nSpeed, int nBits, char nEvent, int nStop)
     else if(nStop == 2){
         newtio.c_cflag |= CSTOPB;
     }
-
-    newtio.c_cc[VMIN] = 10;
-    tcflush(fd, TCIFLUSH);
+    //newtio.c_cc[VTIME] = 0;
+    newtio.c_cc[VMIN] = 1;
+    tcflush(fd, TCIOFLUSH);
 
     if((tcsetattr(fd, TCSANOW, &newtio)) != 0)
     {
@@ -154,9 +152,17 @@ int hdlc_encode(uint8_t *orig_buf, uint8_t *tx_buf, int len)
 void sig_handler_IO(int status)
 {
     uint8_t byte;
-    int bytes = read(fd, hdlc_info.rx_buf, 100);
+    uint8_t buf[200];
+    int bytes = read(fd, buf, 200);
     hdlc_info.rx_len = bytes;
-    printf("Read %d bytes\n", bytes);
+    printf("Read %d bytes ", bytes);
+    if(bytes > 0){
+        //printf("Received hardware version is: ");
+        for(int i = 0; i < bytes; i++){
+            printf("%02X ", buf[i]);
+        }
+        printf("\n");
+    }
     for(int i = 0; i < bytes; i++)
     {
         byte = hdlc_info.rx_buf[i];   
@@ -197,10 +203,7 @@ void sig_handler_IO(int status)
                 break;
         } // end switch
     } // end for
-    if(bytes > 0){
-        printf("Received hardware version is: ");
-        printf("%s\n", hdlc_info.rx_buf);
-    }
+    
 }
 
 
@@ -219,32 +222,29 @@ void main()
     sigaction(SIGIO, &saio, NULL);
     // Initialize hdlc_info
     memset(&hdlc_info, 0, sizeof(hdlc_info));
-    hdlc_info.rx_buf = rx_buf;
-    hdlc_info.tx_buf = tx_buf;
 
-    if((fd = open(uart, O_RDWR|O_NOCTTY)) < 0){
+    if((fd = open(uart, O_RDWR|O_NOCTTY|O_NDELAY)) < 0){
         perror("open failed");
         return;
     }
     set_opt(fd, 3000000, 8, 'N', 1);
     fcntl(fd, F_SETFL, O_ASYNC);
     fcntl(fd, __F_SETOWN, getpid());
-    printf("Open success!\n");
     // Construct bridge control packet
     len = bridge_get_buf(bridge_buf, 100, &value, 0);
     uint8_t test_buf[] = {0x7e, 0x7d, 0x20, 0xba, 0x7d, 0x25, 0x7d, 0x21, 0x64, 0x7d, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0xb8, 0xce, 0x7e};
-    hdlc_encode(bridge_buf, tx_buf, len); 
+    hdlc_encode(bridge_buf, hdlc_info.tx_buf, len); 
     while(1){
         printf("Press Enter to send a packet\n");
         do
         {
             c = getchar();
         } while (c != '\n');
-        bytes = write(fd, tx_buf, 12);
+        bytes = write(fd, test_buf, 18);
         printf("Write %d bytes: ", bytes);
         for(int i = 0; i < bytes; i++)
         {
-            printf("%02X ", tx_buf[i]);
+            printf("%02X ", test_buf[i]);
         }
         printf("\n");
     }
