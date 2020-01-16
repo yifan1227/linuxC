@@ -7,12 +7,17 @@
 #include <unistd.h>
 #include <error.h>
 #include <stdint.h>
+#include <signal.h>
+
+#define _XOPEN_SOURCE 700
 
 #define FLAG_SEQUENCE                   0x7e
-#define CONTROL_ESCAPE                  0x7
+#define CONTROL_ESCAPE                  0x7d
 #define BRIDGE_KEY_IEEE154_TXPOWER      23
 #define BRIDGE_OP_GET                   1
 #define WPAN_PROTO_BRIDGE               0
+
+int fd;
 
 struct bcontrol_hdr{    
     uint8_t version;
@@ -31,6 +36,17 @@ struct bridge_value{
         uint8_t data[1500];
     }u;
 };
+
+typedef struct wpan_hdlc_info{
+    uint8_t *rx_buf;
+    uint16_t rx_len;
+    uint8_t rx_state;
+    uint8_t seqnorx;
+
+    uint8_t *tx_buf;
+    uint16_t tx_len;
+    uint8_t seqnotx;
+}wpan_hdlc_info_t;
 
 static uint16_t fcstab[256] = {
     0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf,
@@ -128,8 +144,6 @@ int set_opt(int fd, int nSpeed, int nBits, char nEvent, int nStop)
 
     newtio.c_cc[VTIME] = 0;
     newtio.c_cc[VMIN] = 10;
-    //newtio.c_oflag &= ~OPOST;
-    //newtio.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); 
     tcflush(fd, TCIFLUSH);
 
     if((tcsetattr(fd, TCSANOW, &newtio)) != 0)
@@ -197,53 +211,64 @@ int hdlc_encode(uint8_t *orig_buf, uint8_t *tx_buf, int len)
     *txcur++ = FLAG_SEQUENCE;
     return 0;
 }
+void sig_handler_IO(int status)
+{
+    uint8_t recv_buf[1000];
+    int bytes = read(fd, recv_buf, 1000);
+    printf("Read %d bytes\n", bytes);
+    if(bytes > 0)
+    {
+        printf("Received packet is: ");
+        for(int i = 0; i < bytes; i++)
+        {
+            printf("%02X ", recv_buf[i]);
+        }
+        printf("\n");
+    }
+}
+
 
 void main()
 {
-    int fd, bytes, len, tx_len;
-    char *uart = "/dev/ttyUSB1";
+    int bytes, len, tx_len;
+    char c;
+    char *uart = "/dev/ttyUSB0";
     struct bridge_value value;
     uint8_t bridge_buf[sizeof(struct bcontrol_hdr) + 1500];
-    uint8_t recv_buf[100];
+    
     uint8_t tx_buf[50];
+    struct sigaction saio;
 
+    saio.sa_handler = sig_handler_IO;
+    saio.sa_flags = 0;
+    saio.sa_restorer = NULL;
+    sigaction(SIGIO, &saio, NULL);
+    
     memset(bridge_buf, 0, 1500);
     if((fd = open(uart, O_RDWR|O_NOCTTY|O_NDELAY)) < 0){
         perror("open failed");
         return;
     }
+    fcntl(fd, F_SETFL, O_ASYNC);
+    fcntl(fd, __F_SETOWN, getpid());
     printf("Open success!\n");
     set_opt(fd, 3000000, 8, 'N', 1);
-    if(fcntl(fd, F_SETFL, 0) < 0)
-        perror("fcntl failed");
     len = bridge_get_buf(bridge_buf, 100, &value, 0);
     uint8_t test_buf[] = {0x7e, 0x7d, 0x20, 0xba, 0x7d, 0x25, 0x7d, 0x21, 0x64, 0x7d, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0xb8, 0xce, 0x7e};
     hdlc_encode(bridge_buf, tx_buf, len); 
-    //hdlc_encode(test_buf, tx_buf, 6); 
     while(1){
-        memset(recv_buf, 0, 1500);
+        printf("Press Enter to send a packet\n");
+        do
+        {
+            c = getchar();
+        } while (c != '\n');
         bytes = write(fd, test_buf, 18);
-        printf("Write %d bytes\n", bytes);
-        printf("Sent paket is: ");
+        printf("Write %d bytes: ", bytes);
         for(int i = 0; i < bytes; i++)
         {
             printf("%02X ", tx_buf[i]);
         }
         printf("\n");
-        bytes = read(fd, recv_buf, 1500);
-        printf("Read %d bytes\n", bytes);
-        if(bytes > 0)
-        {
-            printf("Received packet is: ");
-            for(int i = 0; i < bytes; i++)
-            {
-                printf("%02X ", recv_buf[i]);
-            }
-            printf("\n");
-        }
-        if(bytes < 0)
-            return;
-        sleep(1);
     }
     close(fd);
     printf("Device closed\n");
