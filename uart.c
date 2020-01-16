@@ -201,7 +201,7 @@ int hdlc_encode(uint8_t *orig_buf, uint8_t *tx_buf, int len)
 void main()
 {
     int fd, bytes, len, tx_len;
-    char *uart = "/dev/ttyUSB1";
+    char *uart = "/dev/ttyUSB0";
     struct bridge_value value;
     uint8_t bridge_buf[sizeof(struct bcontrol_hdr) + 1500];
     uint8_t recv_buf[100];
