@@ -127,7 +127,7 @@ int set_opt(int fd, int nSpeed, int nBits, char nEvent, int nStop)
     }
 
     newtio.c_cc[VTIME] = 0;
-    newtio.c_cc[VMIN] = 10;
+    newtio.c_cc[VMIN] = 1;
     //newtio.c_oflag &= ~OPOST;
     //newtio.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); 
     tcflush(fd, TCIFLUSH);
@@ -201,7 +201,7 @@ int hdlc_encode(uint8_t *orig_buf, uint8_t *tx_buf, int len)
 void main()
 {
     int fd, bytes, len, tx_len;
-    char *uart = "/dev/ttyUSB0";
+    char *uart = "/dev/ttyUSB1";
     struct bridge_value value;
     uint8_t bridge_buf[sizeof(struct bcontrol_hdr) + 1500];
     uint8_t recv_buf[100];
@@ -227,7 +227,7 @@ void main()
         printf("Sent paket is: ");
         for(int i = 0; i < bytes; i++)
         {
-            printf("%02X ", tx_buf[i]);
+            printf("%02X ", test_buf[i]);
         }
         printf("\n");
         bytes = read(fd, recv_buf, 1500);
