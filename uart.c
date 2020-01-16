@@ -232,7 +232,7 @@ void main()
 {
     int bytes, len, tx_len;
     char c;
-    char *uart = "/dev/ttyUSB0";
+    char *uart = "/dev/ttyUSB1";
     struct bridge_value value;
     uint8_t bridge_buf[sizeof(struct bcontrol_hdr) + 1500];
     

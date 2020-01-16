@@ -165,7 +165,7 @@ void sig_handler_IO(int status)
     }
     for(int i = 0; i < bytes; i++)
     {
-        byte = hdlc_info.rx_buf[i];   
+        byte = buf[i];   
         switch (hdlc_info.rx_state)
         {
 
@@ -186,12 +186,14 @@ void sig_handler_IO(int status)
                         if(hdlc_info.rx_len){
                             //hdlc_process_rx_frame();
                             hdlc_info.rx_len = 0;
+                            hdlc_info.rx_state = 0;
                         }
                         break;
                     default:
                         hdlc_info.rx_buf[hdlc_info.rx_len++] = byte;
                         break;
                 }
+                break;
 
             case HDLC_ESCAPED:
                 hdlc_info.rx_buf[hdlc_info.rx_len++] = bytes ^ 0x20;
@@ -203,7 +205,10 @@ void sig_handler_IO(int status)
                 break;
         } // end switch
     } // end for
-    
+    uint8_t print_buf[100];
+    memset(print_buf, 0, 100);
+    memcpy(print_buf, &hdlc_info.rx_buf[7], 66);
+    printf("Received message: %s\n", print_buf);
 }
 
 
@@ -211,7 +216,7 @@ void main()
 {
     int bytes, len, tx_len;
     char c;
-    char *uart = "/dev/ttyUSB0";
+    char *uart = "/dev/ttyUSB4";
     struct bridge_value value;
     uint8_t bridge_buf[sizeof(struct bcontrol_hdr) + 1500];    
     struct sigaction saio;
