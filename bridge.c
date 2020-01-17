@@ -236,7 +236,7 @@ void main()
     fcntl(fd, F_SETFL, O_ASYNC);
     fcntl(fd, __F_SETOWN, getpid());
     // Construct bridge control packet
-    len = bridge_get_buf(bridge_buf, 100, &value, 0);
+    len = bridge_get_buf(bridge_buf, BRIDGE_KEY_IEEE154_TXPOWER, &value, 0);
     uint8_t test_buf[] = {0x7e, 0x7d, 0x20, 0xba, 0x7d, 0x25, 0x7d, 0x21, 0x64, 0x7d, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0xb8, 0xce, 0x7e};
     hdlc_encode(bridge_buf, hdlc_info.tx_buf, len); 
     while(1){
@@ -245,11 +245,11 @@ void main()
         {
             c = getchar();
         } while (c != '\n');
-        bytes = write(fd, test_buf, 18);
+        bytes = write(fd, hdlc_info.tx_buf, 12);
         printf("Write %d bytes: ", bytes);
         for(int i = 0; i < bytes; i++)
         {
-            printf("%02X ", test_buf[i]);
+            printf("%02X ", hdlc_info.tx_buf[i]);
         }
         printf("\n");
     }
