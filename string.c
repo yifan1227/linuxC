@@ -16,7 +16,7 @@ int main() {
 	int n = sizeof(e);
 	a = "lianxin";
 	*(b + 1) = 'd';
-	printf("%s\n", a);
+	printf("123 %s 456\n", a);
 	printf("%s\n", b);
 	getchar();
 }
