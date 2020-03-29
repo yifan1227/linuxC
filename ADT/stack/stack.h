@@ -1,6 +1,10 @@
 #ifndef STACK_H
 #define STACK_H
 
+//#define ARR
+//#define DYN_ARR
+#define LINK
+
 #define STACK_TYPE int
 
 void push(STACK_TYPE value);
@@ -17,9 +21,5 @@ int is_full(void);
 void create_stack(int size);
 
 void destroy_stack(void);
-
-#define ARR
-//#define ARR_DYN
-//#define LIST
 
 #endif

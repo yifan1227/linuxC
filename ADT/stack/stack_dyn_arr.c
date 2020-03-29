@@ -1,12 +1,28 @@
 #include "stack.h"
 #include <assert.h>
+#include <stdlib.h>
 
-#define STACK_SIZE  100
+#ifdef DYN_ARR
 
-#ifdef ARR
-
-static STACK_TYPE stack[STACK_SIZE];
+static STACK_TYPE *stack;
 static int top_element = -1;
+static int stack_size;
+
+void create_stack(int size)
+{
+    assert(stack_size == 0);
+    stack_size = size;
+    stack = (STACK_TYPE *)malloc(sizeof(size));
+    assert(stack != NULL);
+}
+
+void destroy_stack(void)
+{
+    assert(stack_size > 0);
+    stack_size = 0;
+    free(stack);
+    stack = NULL;
+}
 
 void push(STACK_TYPE value)
 {
@@ -41,7 +57,7 @@ int is_empty(void)
 
 int is_full(void)
 {
-    return top_element == STACK_SIZE -1;
+    return top_element == stack_size -1;
 }
 
 #endif
