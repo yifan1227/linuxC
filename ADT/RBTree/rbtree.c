@@ -2,21 +2,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define rb_father(r)       ((r)->father)
-#define rb_color(r)        ((r)->color)
-#define is_red(r)       ((r)->color == RED)
-#define is_black(r)     ((r)->color == BLACK)
-#define set_red(r)      do{(r)->color = RED;} while(0)
-#define set_black(r)    do{(r)->color = BLACK;} while(0)
-#define set_father(r, p)    do{(r)->parent = (p);} while(0)
-#define set_color(r, c)     do{(r)->color = (c);} while(0)
+#define rb_father(r)        ((r)->father)
+#define rb_color(r)         ((r)->color)
+#define is_red(r)           ((r)->color == RED)
+#define is_black(r)         ((r)->color == BLACK)
+#define set_red(r)          do {(r)->color = RED;} while(0)
+#define set_black(r)        do {(r)->color = BLACK;} while(0)
+#define set_father(r, p)    do {(r)->parent = (p);} while(0)
+#define set_color(r, c)     do {(r)->color = (c);} while(0)
 
-void swap(void **a, void ** b)
+static void swap(void **a, void ** b)
 {
     void *tmp;
     tmp = *b;
     *b = *a;
     *a = tmp;
+}
+
+/* Replace node a with b */
+static void replace_node(Node *a, Node *b)
+{
+    a->key = b->key;
+    a->value = b->value;
 }
 
 Node **create_rbtree(void)
@@ -207,12 +214,6 @@ static void insert_fixup(Node **root, Node *node)
             if(node == father->rchild)
             {
                 left_rotate(root, father);
-                /*
-                Node *tmp;
-                tmp = father;
-                father = node;
-                node = tmp;
-                */
                 swap(&father, &node);
             }
             // Case 3: uncle is black and node is left child
@@ -244,14 +245,19 @@ static void insert_fixup(Node **root, Node *node)
     set_black(*root);
 }
 
+#ifdef WITHPOS
+/* Create a node at specific position */
+Node *create_node(Type key, void *value, Node *lchild, Node *rchild, Node *father)
+#else
 static Node *create_node(Type key, void *value)
+#endif
 {
     Node *node = (Node *)malloc(sizeof(*node));
     node->key = key;
     node->value = value;
-    node->lchild = NULL;
-    node->rchild = NULL;
-    node->father = NULL;
+    node->lchild = lchild;
+    node->rchild = rchild;
+    node->father = father;
     return node;
 }
 
@@ -287,30 +293,92 @@ static void rbtree_insert_node(Node **root, Node *node)
 /* Insert a node with key and value to RBTree */
 int rbtree_insert(Node **root, Type key, void *value)
 {
-    Node *node = create_node(key, value);
+    Node *node = create_node(key, value, NULL, NULL, NULL);
     if(node == NULL)
         return -1;
     rbtree_insert_node(root, node);
 }
 
-static void delete_fixup(Node **root, Node *node, Node *father)
+static void delete_fixup(Node **root, Node *node)
 {
+    Node *brother, *father, *uncle, *gfather;
 
+    while(node != root){
+
+    }
+    father = rb_father(node);
+    // Node is left child
+    if(node == father->lchild){
+        brother = father->rchild;    
+        // Brother is black
+        if(is_black(brother)){
+            
+        }
+        // Brother is red
+        if(is_red(brother)){
+            set_black(brother);
+            set_red(father);
+            left_rotate(root, father);
+        }
+    }
 }
 
 static void rbtree_delete_node(Node **root, Node *node)
 {
-    Node *child, *father;
+    /* Node to replace the node to be deleted */
+    Node *replace;
     int color;
 
-    // Both left and right children exist
+    // Both left and right children exist, pick successor as replace
     if((node->lchild != NULL) && (node->rchild != NULL)){
-        Node *replace = node;
+        Node *replace = successor(node);
+        // Node is not root
+        if(rb_father(node)){
+            replace_node(node, replace);
+        } else
+            replace_node(*root, replace);
+        rbtree_delete_node(root, replace);
+        return;
+    }
+    // Node has no child
+    else if((node->lchild == NULL) && (node->rchild == NULL)){
+        // Node is root and has no child
+        if(!rb_father(node)){
+            *root = NULL;
+            free(node);
+            return;
+        }
+        // Node is black
+        if(is_black(node))
+            delete_fixup(root, node);
+        if(node == rb_father(node)->lchild)
+            rb_father(node)->lchild = NULL;
+        else
+            rb_father(node)->rchild = NULL;
+        free(node);
+        return;
+    }
+    // Node has only 1 child, node must be black
+    else{
+        replace = node->lchild? node->lchild : node->rchild;
+        if(rb_father(node)){
+            if(node == rb_father(node)->lchild)
+                rb_father(node)->lchild = replace;
+            else
+                rb_father(node)->rchild = replace;
+        }
+        else
+            *root = replace;
+        set_black(replace);
+        free(node);
+        return;
     }
 }
 
 void rbtree_delete(Node **root, Type key)
 {
+    if(*root == NULL)
+        return;
     Node *node;
     if((node = rbtree_search(*root, key)) != NULL)
         rbtree_delete_node(root, node);
