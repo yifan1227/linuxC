@@ -4,12 +4,12 @@
 
 #define rb_father(r)        ((r)->father)
 #define rb_color(r)         ((r)->color)
-#define is_red(r)           ((r)->color == RED)
-#define is_black(r)         ((r)->color == BLACK)
-#define set_red(r)          do {(r)->color = RED;} while(0)
-#define set_black(r)        do {(r)->color = BLACK;} while(0)
+#define is_red(r)           (((r) != NULL) && ((r)->color == RED))
+#define is_black(r)         (((r)->color == BLACK) || ((r) == NULL))
+#define set_red(r)          do {if(r){(r)->color = RED;}} while(0)
+#define set_black(r)        do {if(r){(r)->color = BLACK;}} while(0)
 #define set_father(r, p)    do {(r)->parent = (p);} while(0)
-#define set_color(r, c)     do {(r)->color = (c);} while(0)
+#define set_color(r, c)     do {if(r){(r)->color = (c);}} while(0)
 
 static void swap(void **a, void ** b)
 {
@@ -29,7 +29,7 @@ static void replace_node(Node *a, Node *b)
 Node **create_rbtree(void)
 {
     Node **root = malloc(sizeof(Node **));
-    root = NULL;
+    *root = NULL;
     return root;
 }
 
@@ -247,7 +247,7 @@ static void insert_fixup(Node **root, Node *node)
 
 #ifdef WITHPOS
 /* Create a node at specific position */
-Node *create_node(Type key, void *value, Node *lchild, Node *rchild, Node *father)
+Node *create_node(Type key, void *value, int color, Node *lchild, Node *rchild, Node *father)
 #else
 static Node *create_node(Type key, void *value)
 #endif
@@ -255,6 +255,7 @@ static Node *create_node(Type key, void *value)
     Node *node = (Node *)malloc(sizeof(*node));
     node->key = key;
     node->value = value;
+    node->color = color;
     node->lchild = lchild;
     node->rchild = rchild;
     node->father = father;
@@ -271,8 +272,10 @@ static void rbtree_insert_node(Node **root, Node *node)
         y = x;
         if(node->key < x->key)
             x = x->lchild;
-        else
+        else if(node->key > x->key)
             x = x->rchild;
+        else
+            x->value = node->value;
     }
     rb_father(node) = y;
     if(y != NULL){
@@ -293,7 +296,7 @@ static void rbtree_insert_node(Node **root, Node *node)
 /* Insert a node with key and value to RBTree */
 int rbtree_insert(Node **root, Type key, void *value)
 {
-    Node *node = create_node(key, value, NULL, NULL, NULL);
+    Node *node = create_node(key, value, RED, NULL, NULL, NULL);
     if(node == NULL)
         return -1;
     rbtree_insert_node(root, node);
@@ -301,24 +304,94 @@ int rbtree_insert(Node **root, Type key, void *value)
 
 static void delete_fixup(Node **root, Node *node)
 {
-    Node *brother, *father, *uncle, *gfather;
+    Node *brother, *father;
 
-    while(node != root){
-
-    }
-    father = rb_father(node);
-    // Node is left child
-    if(node == father->lchild){
-        brother = father->rchild;    
-        // Brother is black
-        if(is_black(brother)){
-            
+    while(node != *root){
+        father = rb_father(node);
+        // Node is left child
+        if(node == father->lchild){
+            brother = father->rchild;    
+            // 兄黑
+            if(is_black(brother)){
+                // 兄子全黑
+                if(is_black(brother->lchild) && is_black(brother->rchild)){
+                    // 父黑，涂红兄，向上递归父
+                    if(is_black(father)){
+                        set_red(brother);
+                        node = father;
+                        continue;
+                    } 
+                    // 父红，交换父兄颜色
+                    else{
+                        set_red(brother);
+                        set_black(father);
+                        break;
+                    }
+                }
+                // 兄右子为红，以父为支点左旋，兄染父色，父染黑
+                if(is_red(brother->rchild)){
+                    left_rotate(root, father);
+                    set_black(father);
+                    set_color(brother, is_black(father)? BLACK : RED);
+                    break;
+                }
+                // 兄左子为红，右子为黑
+                if(is_red(brother->lchild) && is_black(brother->rchild)){
+                    right_rotate(root, brother);
+                    set_black(brother->lchild);
+                    set_red(brother);
+                    continue;
+                }
+            }
+            //兄红
+            else{
+                set_black(brother);
+                set_red(father);
+                left_rotate(root, father);
+                continue;
+            }
         }
-        // Brother is red
-        if(is_red(brother)){
-            set_black(brother);
-            set_red(father);
-            left_rotate(root, father);
+        // Node is right child, symmetrically
+        else{
+            brother = father->lchild;
+            if(is_black(brother)){
+                // 兄子全黑
+                if(is_black(brother->lchild) && is_black(brother->rchild)){
+                    // 父黑，涂红兄，向上递归父
+                    if(is_black(father)){
+                        set_red(brother);
+                        node = father;
+                        continue;
+                    } 
+                    // 父红，交换父兄颜色
+                    else{
+                        set_red(brother);
+                        set_black(father);
+                        break;
+                    }
+                }
+                // 兄左子为红，以父为支点右旋，兄染父色，父染黑
+                if(is_red(brother->lchild)){
+                    right_rotate(root, father);
+                    set_black(father);
+                    set_color(brother, is_black(father)? BLACK : RED);
+                    break;
+                }
+                // 兄右子为红，左子为黑
+                if(is_red(brother->rchild) && is_black(brother->lchild)){
+                    left_rotate(root, brother);
+                    set_black(brother->rchild);
+                    set_red(brother);
+                    continue;
+                }
+            }
+            //兄红
+            else{
+                set_black(brother);
+                set_red(father);
+                right_rotate(root, father);
+                continue;
+            }
         }
     }
 }
@@ -338,6 +411,7 @@ static void rbtree_delete_node(Node **root, Node *node)
         } else
             replace_node(*root, replace);
         rbtree_delete_node(root, replace);
+        free(replace);
         return;
     }
     // Node has no child

@@ -28,7 +28,7 @@ void postorder(RBTree tree);
 
 #ifdef WITHPOS
 /* Create a node at specific position */
-Node *create_node(Type key, void *value, Node *lchild, Node *rchild, Node *father);
+Node *create_node(Type key, void *value, int color, Node *lchild, Node *rchild, Node *father);
 #endif
 
 int rbtree_insert(Node **root, Type key, void *value);
