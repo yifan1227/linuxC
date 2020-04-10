@@ -26,10 +26,10 @@ void inorder(RBTree tree);
 
 void postorder(RBTree tree);
 
-#ifdef WITHPOS
-/* Create a node at specific position */
-Node *create_node(Type key, void *value, int color, Node *lchild, Node *rchild, Node *father);
-#endif
+Node *create_node(Type key, void *value, int color);
+
+/* Insert node to specific position */
+void insert_node(Node *node, Node *lchild, Node *rchild, Node *father);
 
 int rbtree_insert(Node **root, Type key, void *value);
 
