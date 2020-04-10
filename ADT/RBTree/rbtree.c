@@ -11,6 +11,13 @@
 #define set_father(r, p)    do {(r)->parent = (p);} while(0)
 #define set_color(r, c)     do {if(r){(r)->color = (c);}} while(0)
 
+/* compare function 
+    a > b return 1;    
+    a = b return 0;
+    a < b return -1;
+*/
+int (*compare)(void *a, void *b);
+
 static void swap(void **a, void ** b)
 {
     void *tmp;
