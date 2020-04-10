@@ -60,6 +60,22 @@ void postorder(RBTree tree)
     }
 }
 
+void print_tree(RBTree tree, Type key, int direction)
+{
+    if (tree != NULL){
+        if(direction == 0){
+            printf("%2d (B) is root\n", tree->key);
+        }
+        else{
+            printf("%d (%s) is %d's %6s child\n", tree->key,
+                    is_black(tree)?"B" : "R", key,
+                    direction == 1? "right" : "left");
+        }
+        print_tree(tree->lchild, tree->key, -1);
+        print_tree(tree->rchild, tree->key, 1);
+    }
+}
+
 RBTree rbtree_search(RBTree x, Type key)
 {
     if(x == NULL || x->key == key)
