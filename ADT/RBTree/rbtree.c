@@ -33,9 +33,9 @@ static void replace_node(Node *a, Node *b)
     a->value = b->value;
 }
 
-Node **create_rbtree(void)
+treeroot create_rbtree(void)
 {
-    Node **root = malloc(sizeof(Node **));
+    treeroot root = malloc(sizeof(treeroot ));
     *root = NULL;
     return root;
 }
@@ -154,7 +154,7 @@ static Node *predecessor(RBTree x)
        / \             / \
       ly ry           lx ly
 */
-static void left_rotate(Node **root, Node *x)
+static void left_rotate(treeroot root, Node *x)
 {
     // y is x's right child
     Node *y = x->rchild;
@@ -190,7 +190,7 @@ static void left_rotate(Node **root, Node *x)
    / \                     / \
   lx rx                   rx ry
 */
-static void right_rotate(Node **root, Node *y)
+static void right_rotate(treeroot root, Node *y)
 {
     // x is y's left child
     Node *x = y->lchild;
@@ -217,7 +217,7 @@ static void right_rotate(Node **root, Node *y)
     y->father = x;
 }
 
-static void insert_fixup(Node **root, Node *node)
+static void insert_fixup(treeroot root, Node *node)
 {
     Node *father, *gfather;
 
@@ -287,7 +287,7 @@ void insert_node(Node *node, Node *lchild, Node *rchild, Node *father)
     node->father = father;
 }
 
-static void rbtree_insert_node(Node **root, Node *node)
+static void rbtree_insert_node(treeroot root, Node *node)
 {
     Node *y = NULL;
     Node *x = *root;
@@ -319,7 +319,7 @@ static void rbtree_insert_node(Node **root, Node *node)
 }
 
 /* Insert a node with key and value to RBTree */
-int rbtree_insert(Node **root, Type key, void *value)
+int rbtree_insert(treeroot root, Type key, void *value)
 {
     Node *node = create_node(key, value, RED);
     if(node == NULL)
@@ -327,7 +327,7 @@ int rbtree_insert(Node **root, Type key, void *value)
     rbtree_insert_node(root, node);
 }
 
-static void delete_fixup(Node **root, Node *node)
+static void delete_fixup(treeroot root, Node *node)
 {
     Node *brother, *father;
 
@@ -423,7 +423,7 @@ static void delete_fixup(Node **root, Node *node)
     }
 }
 
-static void rbtree_delete_node(Node **root, Node *node)
+static void rbtree_delete_node(treeroot root, Node *node)
 {
     /* Node to replace the node to be deleted */
     Node *replace;
@@ -476,7 +476,7 @@ static void rbtree_delete_node(Node **root, Node *node)
     }
 }
 
-void rbtree_delete(Node **root, Type key)
+void rbtree_delete(treeroot root, Type key)
 {
     if(*root == NULL)
         return;

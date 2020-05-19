@@ -154,9 +154,9 @@ main(int argc, char **argv)
 	char *s1 = "Timer 1";
 	char *s2 = "Timer 2";
 	char *s3 = "Timer 3";
-	register_timer_event(0, timer_cb, 1500, s1);
-	register_timer_event(0, timer_cb, 2500, s2);
-	register_timer_event(1, timer_cb, 3000, s3);
+	//register_timer_event(0, timer_cb, 1500, s1);
+	//register_timer_event(0, timer_cb, 2500, s2);
+	//register_timer_event(1, timer_cb, 3000, s3);
  
 	event_base_dispatch(base);
 	event_base_free(base);
