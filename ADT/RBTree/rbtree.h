@@ -5,6 +5,7 @@
 #define BLACK   1
 
 typedef int Type;
+typedef Node ** treeroot;
 
 typedef struct RBTreeNode{
     unsigned char color;
@@ -15,7 +16,7 @@ typedef struct RBTreeNode{
     struct RBTreeNode *father;
 }Node, *RBTree;
 
-Node **create_rbtree(void);
+treeroot create_rbtree(void);
 
 /* Traverse the tree */
 void preorder(RBTree tree);
@@ -31,9 +32,9 @@ Node *create_node(Type key, void *value, int color);
 /* Insert node to specific position, for test */
 void insert_node(Node *node, Node *lchild, Node *rchild, Node *father);
 
-int rbtree_insert(Node **root, Type key, void *value);
+int rbtree_insert(treeroot root, Type key, void *value);
 
-void rbtree_delete(Node **root, Type key);
+void rbtree_delete(treeroot root, Type key);
 
 void rbtree_destroy(RBTree tree);
 

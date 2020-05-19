@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdint.h>
+#include <string.h>
  
 #define BUFS PIPE_BUF
 
@@ -16,23 +17,29 @@ int main()
     int fd;
     int n, i;
     char buf[BUFS];
+    const char *fifo = "/home/y/cgr-lite/cli.fifo";
     time_t tp;
  
     printf("I am %d\n", getpid());
-    if (access("event.fifo", F_OK) != 0)
+    if (access(fifo, F_OK) != 0)
     {
-        if (mkfifo("event.fifo", 0666))
-        {
-            printf("event.fifo not existed, and create event.fifo failed!\n");
-            exit(1);
-        }
+        printf("cli.fifo not existed\n");
+        exit(1);
     }
-    if ((fd = open("event.fifo", O_WRONLY)) < 0)
+    if ((fd = open(fifo, O_WRONLY)) < 0)
     {
         printf("Open failed!\n");
         exit(1);
     }
- 
+    
+    char cmd[50];
+    int len;
+
+    while(1){
+        fgets(cmd, 60, stdin);
+        len = strlen(cmd);        
+        write(fd, cmd, len);
+    }
     //for (i = 0; i < 10; i++)
     //{
         time(&tp);
