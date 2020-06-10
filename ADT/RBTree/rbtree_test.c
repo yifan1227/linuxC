@@ -34,8 +34,8 @@ int main()
     #endif
 
     #ifdef TEST2
-    for(int i = 0; i < 9; i++)
-        rbtree_insert(root, (i + 1) * 10, NULL);
+    for(int i = 0; i < 100; i++)
+        rbtree_insert(root, i, NULL);
     rbtree_delete(root, 50);
     inorder(*root);
     printf("\n");
