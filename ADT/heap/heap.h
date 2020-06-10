@@ -5,4 +5,6 @@
 
 void insert(HEAP_TYPE value);
 
+void delete();
+
 #endif

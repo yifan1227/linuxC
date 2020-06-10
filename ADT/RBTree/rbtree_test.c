@@ -2,10 +2,10 @@
 #include <stdio.h>
 
 #define TEST2
-// TODO 野指针的问题
+
 int main()
 {
-    Node **root;
+    treeroot root;
     root = create_rbtree();
 
     #ifdef TEST1
